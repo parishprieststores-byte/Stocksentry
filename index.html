@@ -6,169 +6,124 @@
 <title>StockSentry</title>
 <style>
   :root {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --card2: #273449;
-    --accent: #38bdf8;
-    --accent2: #22c55e;
-    --danger: #ef4444;
-    --warn: #f59e0b;
-    --text: #e2e8f0;
-    --muted: #94a3b8;
-    --border: #334155;
+    --bg:#0f172a; --card:#1e293b; --card2:#273449;
+    --accent:#38bdf8; --accent2:#22c55e; --danger:#ef4444;
+    --warn:#f59e0b; --purple:#a78bfa;
+    --text:#e2e8f0; --muted:#94a3b8; --border:#334155;
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    padding: 16px;
+    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    background:var(--bg); color:var(--text); padding:16px;
   }
-  h1 { margin: 0 0 4px; font-size: 1.6rem; }
-  .sub { color: var(--muted); font-size: .85rem; margin-bottom: 16px; }
+  h1 { margin:0 0 4px; font-size:1.6rem; }
+  .sub { color:var(--muted); font-size:.85rem; margin-bottom:16px; }
 
+  /* Tabs */
+  .tabs {
+    display:flex; gap:4px; margin-bottom:16px; flex-wrap:wrap;
+    background:var(--card); padding:4px; border-radius:10px;
+    border:1px solid var(--border);
+  }
+  .tab {
+    flex:1; padding:10px; text-align:center; cursor:pointer;
+    border-radius:8px; font-size:.85rem; font-weight:600;
+    color:var(--muted); transition:.15s; min-width:80px;
+  }
+  .tab.active { background:var(--accent); color:#0b1220; }
+  .tab:hover:not(.active) { background:var(--card2); color:var(--text); }
+
+  .panel { display:none; }
+  .panel.active { display:block; }
+
+  /* Stats */
   .stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:10px; margin-bottom:16px;
   }
   .stat {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    text-align: center;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:10px; padding:12px;
   }
-  .stat .num { font-size: 1.6rem; font-weight: 700; }
-  .stat .label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
-  .stat.low .num { color: var(--warn); }
-  .stat.exp .num { color: var(--danger); }
+  .stat .num { font-size:1.3rem; font-weight:700; }
+  .stat .label { font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+  .stat.low .num { color:var(--warn); }
+  .stat.exp .num { color:var(--danger); }
+  .stat.money .num { color:var(--accent2); }
+  .stat.profit .num { color:var(--purple); }
 
-  .toolbar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
+  .toolbar { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
   button {
-    background: var(--accent);
-    color: #0b1220;
-    border: none;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: .9rem;
+    background:var(--accent); color:#0b1220; border:none;
+    padding:10px 14px; border-radius:8px; font-weight:600;
+    cursor:pointer; font-size:.9rem;
   }
-  button:hover { filter: brightness(1.1); }
-  button.secondary {
-    background: var(--card2);
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
-  button.danger { background: var(--danger); color: white; }
+  button:hover { filter:brightness(1.1); }
+  button.secondary { background:var(--card2); color:var(--text); border:1px solid var(--border); }
+  button.danger { background:var(--danger); color:white; }
+  button.success { background:var(--accent2); color:white; }
+  button.small { padding:6px 10px; font-size:.75rem; }
 
   .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:16px; margin-bottom:16px;
   }
   .card h2 {
-    margin: 0 0 12px;
-    font-size: 1.1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    margin:0 0 12px; font-size:1.05rem;
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
   }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: .85rem;
-  }
-  th, td {
-    padding: 8px 6px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-  }
-  th { color: var(--muted); font-weight: 600; font-size: .75rem; text-transform: uppercase; }
-  tr:hover td { background: rgba(56,189,248,.05); }
+  table { width:100%; border-collapse:collapse; font-size:.85rem; }
+  th, td { padding:8px 6px; text-align:left; border-bottom:1px solid var(--border); }
+  th { color:var(--muted); font-weight:600; font-size:.72rem; text-transform:uppercase; }
+  tr:hover td { background:rgba(56,189,248,.05); }
 
-  .empty {
-    text-align: center;
-    color: var(--muted);
-    padding: 24px 0;
-    font-style: italic;
-  }
+  .empty { text-align:center; color:var(--muted); padding:24px 0; font-style:italic; }
 
-  /* Modal */
   .modal-bg {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.6);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    z-index: 100;
+    position:fixed; inset:0; background:rgba(0,0,0,.65);
+    display:none; align-items:center; justify-content:center;
+    padding:16px; z-index:100;
   }
-  .modal-bg.active { display: flex; }
+  .modal-bg.active { display:flex; }
   .modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    width: 100%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:20px; width:100%; max-width:520px;
+    max-height:90vh; overflow-y:auto;
   }
-  .modal h3 { margin: 0 0 16px; }
+  .modal h3 { margin:0 0 16px; }
 
-  label {
-    display: block;
-    font-size: .8rem;
-    color: var(--muted);
-    margin: 10px 0 4px;
-  }
+  label { display:block; font-size:.8rem; color:var(--muted); margin:10px 0 4px; }
   input, select {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 9px 10px;
-    border-radius: 6px;
-    font-size: .9rem;
+    width:100%; background:var(--bg); border:1px solid var(--border);
+    color:var(--text); padding:9px 10px; border-radius:6px; font-size:.9rem;
   }
-  input:focus, select:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  input:focus, select:focus { outline:none; border-color:var(--accent); }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 
   .modal-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 18px;
-    justify-content: flex-end;
+    display:flex; gap:8px; margin-top:18px; justify-content:flex-end;
   }
 
   .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-size: .7rem;
-    font-weight: 600;
+    display:inline-block; padding:2px 8px; border-radius:999px;
+    font-size:.7rem; font-weight:600;
   }
-  .badge.ok { background: rgba(34,197,94,.2); color: #4ade80; }
-  .badge.low { background: rgba(245,158,11,.2); color: #fbbf24; }
-  .badge.out { background: rgba(239,68,68,.2); color: #f87171; }
+  .badge.ok { background:rgba(34,197,94,.2); color:#4ade80; }
+  .badge.low { background:rgba(245,158,11,.2); color:#fbbf24; }
+  .badge.out { background:rgba(239,68,68,.2); color:#f87171; }
+  .badge.paid { background:rgba(34,197,94,.2); color:#4ade80; }
+  .badge.unpaid { background:rgba(239,68,68,.2); color:#f87171; }
 
-  .money { color: #4ade80; }
-  .cost { color: #fbbf24; }
+  .money { color:#4ade80; }
+  .cost { color:#fbbf24; }
+  .profit { color:var(--purple); }
+
+  .notice {
+    background:rgba(56,189,248,.1); border:1px solid rgba(56,189,248,.3);
+    border-radius:8px; padding:10px 12px; font-size:.8rem;
+    color:var(--muted); margin-bottom:12px;
+  }
 </style>
 </head>
 <body>
@@ -176,107 +131,177 @@
   <h1>StockSentry</h1>
   <div class="sub">Simple inventory control · Online</div>
 
-  <div class="stats">
-    <div class="stat"><div class="num" id="statTotal">0</div><div class="label">Total items</div></div>
-    <div class="stat low"><div class="num" id="statLow">0</div><div class="label">Low stock</div></div>
-    <div class="stat exp"><div class="num" id="statExp">0</div><div class="label">Expiring</div></div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('inventory', this)">📦 Inventory</div>
+    <div class="tab" onclick="showTab('sales', this)">🛒 Sales</div>
+    <div class="tab" onclick="showTab('accounting', this)">💰 Accounting</div>
+    <div class="tab" onclick="showTab('staff', this)">👥 Staff</div>
+    <div class="tab" onclick="showTab('backup', this)">💾 Backup</div>
   </div>
 
-  <div class="toolbar">
-    <button onclick="openItemModal()">＋ Add item</button>
-    <button class="secondary" onclick="openSaleModal()">🛒 Record sale</button>
-    <button class="secondary" onclick="exportCSV()">Export CSV</button>
-  </div>
+  <!-- ============ INVENTORY ============ -->
+  <div class="panel active" id="panel-inventory">
+    <div class="stats">
+      <div class="stat"><div class="num" id="statTotal">0</div><div class="label">Total items</div></div>
+      <div class="stat low"><div class="num" id="statLow">0</div><div class="label">Low stock</div></div>
+      <div class="stat exp"><div class="num" id="statExp">0</div><div class="label">Expiring</div></div>
+    </div>
 
-  <!-- Inventory -->
-  <div class="card">
-    <h2>Inventory</h2>
-    <div style="overflow-x:auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>Item</th>
-            <th>Category</th>
-            <th>Qty</th>
-            <th>Shelf</th>
-            <th>Cost</th>
-            <th>Price</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="inventoryBody">
-          <tr><td colspan="7" class="empty">No stock items yet. Tap "Add item" to begin.</td></tr>
-        </tbody>
-      </table>
+    <div class="toolbar">
+      <button onclick="openItemModal()">＋ Add item</button>
+      <button class="secondary" onclick="openSaleModal()">🛒 Record sale</button>
+      <button class="secondary" onclick="exportCSV()">Export CSV</button>
+    </div>
+
+    <div class="card">
+      <h2>Inventory</h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th><th>Category</th><th>Qty</th><th>Shelf</th>
+              <th>Cost</th><th>Price</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryBody">
+            <tr><td colspan="7" class="empty">No stock items yet. Tap "Add item" to begin.</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- Sales log -->
-  <div class="card">
-    <h2>Sales / Movement log <button class="danger" style="font-size:.75rem;padding:6px 10px;" onclick="clearLog()">Clear</button></h2>
-    <div style="overflow-x:auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Item</th>
-            <th>Qty sold</th>
-            <th>Attendant</th>
-            <th>Unit price</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody id="logBody">
-          <tr><td colspan="6" class="empty">No movements recorded.</td></tr>
-        </tbody>
-      </table>
+  <!-- ============ SALES ============ -->
+  <div class="panel" id="panel-sales">
+    <div class="toolbar">
+      <button class="secondary" onclick="openSaleModal()">🛒 Record sale</button>
+      <button class="danger" onclick="clearLog()">Clear sales log</button>
+    </div>
+    <div class="card">
+      <h2>Sales / Movement log</h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Item</th><th>Qty sold</th>
+              <th>Attendant</th><th>Unit price</th><th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="logBody">
+            <tr><td colspan="6" class="empty">No movements recorded.</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- Add Item Modal -->
+  <!-- ============ ACCOUNTING ============ -->
+  <div class="panel" id="panel-accounting">
+    <div class="stats">
+      <div class="stat money"><div class="num" id="accSales">₦0</div><div class="label">Total sales</div></div>
+      <div class="stat"><div class="num" id="accCogs">₦0</div><div class="label">Cost of goods sold</div></div>
+      <div class="stat profit"><div class="num" id="accProfit">₦0</div><div class="label">Gross profit</div></div>
+      <div class="stat money"><div class="num" id="accStockCost">₦0</div><div class="label">Stock value (cost)</div></div>
+      <div class="stat money"><div class="num" id="accStockRetail">₦0</div><div class="label">Stock value (retail)</div></div>
+      <div class="stat profit"><div class="num" id="accNetProfit">₦0</div><div class="label">Net profit</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Salary summary</h2>
+      <div class="stats" style="margin:0;">
+        <div class="stat"><div class="num" id="accSalaryTotal">₦0</div><div class="label">Total salary bill</div></div>
+        <div class="stat money"><div class="num" id="accSalaryPaid">₦0</div><div class="label">Paid</div></div>
+        <div class="stat exp"><div class="num" id="accSalaryUnpaid">₦0</div><div class="label">Unpaid</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Summary</h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <tbody id="accountingSummary"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ STAFF ============ -->
+  <div class="panel" id="panel-staff">
+    <div class="toolbar">
+      <button onclick="openStaffModal()">＋ Add staff</button>
+    </div>
+    <div class="card">
+      <h2>Staff & salaries</h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th><th>Role</th><th>Salary (₦)</th>
+              <th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="staffBody">
+            <tr><td colspan="5" class="empty">No staff added yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BACKUP ============ -->
+  <div class="panel" id="panel-backup">
+    <div class="notice">
+      💡 Download a backup regularly. To restore, pick a previously exported <b>.json</b> file.
+      This overwrites all current data.
+    </div>
+
+    <div class="card">
+      <h2>Backup & restore</h2>
+      <div class="toolbar" style="margin-bottom:12px;">
+        <button class="success" onclick="downloadBackup()">⬇ Download backup (.json)</button>
+        <button class="secondary" onclick="document.getElementById('restoreFile').click()">⬆ Restore from file</button>
+        <input type="file" id="restoreFile" accept=".json" style="display:none;" onchange="restoreBackup(event)" />
+      </div>
+      <div class="toolbar" style="margin-bottom:0;">
+        <button class="secondary" onclick="exportCSV()">Export inventory CSV</button>
+        <button class="secondary" onclick="exportSalesCSV()">Export sales CSV</button>
+        <button class="danger" onclick="wipeAll()">⚠ Wipe all data</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Backup info</h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <tbody id="backupInfo"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODALS ============ -->
+
+  <!-- Item -->
   <div class="modal-bg" id="itemModal">
     <div class="modal">
       <h3>Add stock item</h3>
-
       <label>Item name</label>
       <input id="itemName" placeholder="e.g. Rice 5kg" />
-
       <div class="row">
-        <div>
-          <label>Category</label>
-          <input id="itemCategory" placeholder="e.g. Food" />
-        </div>
-        <div>
-          <label>Shelf number</label>
-          <input id="itemShelf" placeholder="e.g. A3" />
-        </div>
+        <div><label>Category</label><input id="itemCategory" placeholder="e.g. Food" /></div>
+        <div><label>Shelf number</label><input id="itemShelf" placeholder="e.g. A3" /></div>
       </div>
-
       <div class="row">
-        <div>
-          <label>Quantity</label>
-          <input id="itemQty" type="number" min="0" value="0" />
-        </div>
-        <div>
-          <label>Minimum level</label>
-          <input id="itemMin" type="number" min="0" value="5" />
-        </div>
+        <div><label>Quantity</label><input id="itemQty" type="number" min="0" value="0" /></div>
+        <div><label>Minimum level</label><input id="itemMin" type="number" min="0" value="5" /></div>
       </div>
-
       <div class="row">
-        <div>
-          <label>Cost price (₦)</label>
-          <input id="itemCost" type="number" min="0" step="0.01" value="0" />
-        </div>
-        <div>
-          <label>Selling price (₦)</label>
-          <input id="itemPrice" type="number" min="0" step="0.01" value="0" />
-        </div>
+        <div><label>Cost price (₦)</label><input id="itemCost" type="number" min="0" step="0.01" value="0" /></div>
+        <div><label>Selling price (₦)</label><input id="itemPrice" type="number" min="0" step="0.01" value="0" /></div>
       </div>
-
       <label>Expiry date (optional)</label>
       <input id="itemExpiry" type="date" />
-
       <div class="modal-actions">
         <button class="secondary" onclick="closeModal('itemModal')">Cancel</button>
         <button onclick="saveItem()">Save item</button>
@@ -284,25 +309,16 @@
     </div>
   </div>
 
-  <!-- Sale Modal -->
+  <!-- Sale -->
   <div class="modal-bg" id="saleModal">
     <div class="modal">
       <h3>Record sale</h3>
-
       <label>Item</label>
       <select id="saleItem"></select>
-
       <div class="row">
-        <div>
-          <label>Quantity sold</label>
-          <input id="saleQty" type="number" min="1" value="1" />
-        </div>
-        <div>
-          <label>Name of attendant</label>
-          <input id="saleAttendant" placeholder="e.g. Chidi" />
-        </div>
+        <div><label>Quantity sold</label><input id="saleQty" type="number" min="1" value="1" /></div>
+        <div><label>Name of attendant</label><input id="saleAttendant" placeholder="e.g. Chidi" /></div>
       </div>
-
       <div class="modal-actions">
         <button class="secondary" onclick="closeModal('saleModal')">Cancel</button>
         <button onclick="saveSale()">Record sale</button>
@@ -310,17 +326,56 @@
     </div>
   </div>
 
+  <!-- Staff -->
+  <div class="modal-bg" id="staffModal">
+    <div class="modal">
+      <h3>Add staff</h3>
+      <label>Full name</label>
+      <input id="staffName" placeholder="e.g. Chidi Okeke" />
+      <div class="row">
+        <div><label>Role</label><input id="staffRole" placeholder="e.g. Cashier" /></div>
+        <div><label>Monthly salary (₦)</label><input id="staffSalary" type="number" min="0" step="0.01" value="0" /></div>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" onclick="closeModal('staffModal')">Cancel</button>
+        <button onclick="saveStaff()">Save staff</button>
+      </div>
+    </div>
+  </div>
+
 <script>
-/* ---------- State ---------- */
-let items = JSON.parse(localStorage.getItem('ss_items') || '[]');
-let log   = JSON.parse(localStorage.getItem('ss_log')   || '[]');
+/* ================= STATE ================= */
+let items  = JSON.parse(localStorage.getItem('ss_items')  || '[]');
+let log    = JSON.parse(localStorage.getItem('ss_log')    || '[]');
+let staff  = JSON.parse(localStorage.getItem('ss_staff')  || '[]');
+let meta   = JSON.parse(localStorage.getItem('ss_meta')   || '{"lastBackup":null}');
 
 function persist() {
   localStorage.setItem('ss_items', JSON.stringify(items));
   localStorage.setItem('ss_log',   JSON.stringify(log));
+  localStorage.setItem('ss_staff', JSON.stringify(staff));
+  localStorage.setItem('ss_meta',  JSON.stringify(meta));
 }
 
-/* ---------- Modals ---------- */
+/* ================= TABS ================= */
+function showTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+/* ================= HELPERS ================= */
+function ngn(n) {
+  return '₦' + Number(n || 0).toLocaleString('en-NG', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+/* ================= MODALS ================= */
 function openItemModal() {
   ['itemName','itemCategory','itemShelf','itemCost','itemPrice','itemExpiry'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('itemQty').value = 0;
@@ -331,20 +386,25 @@ function openSaleModal() {
   if (items.length === 0) { alert('Add an item first.'); return; }
   const sel = document.getElementById('saleItem');
   sel.innerHTML = items.map((it, i) =>
-    `<option value="${i}">${it.name} (${it.qty} in stock) — ₦${it.price}</option>`
+    `<option value="${i}">${it.name} (${it.qty} in stock) — ${ngn(it.price)}</option>`
   ).join('');
   document.getElementById('saleQty').value = 1;
   document.getElementById('saleAttendant').value = '';
   document.getElementById('saleModal').classList.add('active');
 }
+function openStaffModal() {
+  ['staffName','staffRole'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('staffSalary').value = 0;
+  document.getElementById('staffModal').classList.add('active');
+}
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-/* ---------- Save Item ---------- */
+/* ================= ITEMS ================= */
 function saveItem() {
   const name = document.getElementById('itemName').value.trim();
   if (!name) { alert('Item name required'); return; }
 
-  const item = {
+  items.push({
     id: Date.now(),
     name,
     category: document.getElementById('itemCategory').value.trim(),
@@ -354,14 +414,11 @@ function saveItem() {
     cost:     Number(document.getElementById('itemCost').value)  || 0,
     price:    Number(document.getElementById('itemPrice').value) || 0,
     expiry:   document.getElementById('itemExpiry').value || ''
-  };
-  items.push(item);
-  persist();
-  closeModal('itemModal');
-  render();
+  });
+  persist(); closeModal('itemModal'); render();
 }
 
-/* ---------- Save Sale ---------- */
+/* ================= SALES ================= */
 function saveSale() {
   const idx = Number(document.getElementById('saleItem').value);
   const qty = Number(document.getElementById('saleQty').value);
@@ -380,17 +437,43 @@ function saveSale() {
     qty,
     attendant,
     price: item.price,
-    total: (item.price * qty).toFixed(2)
+    cost:  item.cost,
+    total: Number((item.price * qty).toFixed(2)),
+    cogs:  Number((item.cost  * qty).toFixed(2))
   });
 
-  persist();
-  closeModal('saleModal');
-  render();
+  persist(); closeModal('saleModal'); render();
 }
 
-/* ---------- Render ---------- */
+/* ================= STAFF ================= */
+function saveStaff() {
+  const name = document.getElementById('staffName').value.trim();
+  if (!name) { alert('Staff name required'); return; }
+
+  staff.push({
+    id: Date.now(),
+    name,
+    role: document.getElementById('staffRole').value.trim(),
+    salary: Number(document.getElementById('staffSalary').value) || 0,
+    paid: false
+  });
+  persist(); closeModal('staffModal'); render();
+}
+
+function togglePaid(id) {
+  const s = staff.find(x => x.id === id);
+  if (s) { s.paid = !s.paid; persist(); render(); }
+}
+
+function deleteStaff(id) {
+  if (!confirm('Remove this staff member?')) return;
+  staff = staff.filter(x => x.id !== id);
+  persist(); render();
+}
+
+/* ================= RENDER ================= */
 function render() {
-  /* Inventory */
+  /* ---- Inventory ---- */
   const tbody = document.getElementById('inventoryBody');
   if (items.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" class="empty">No stock items yet. Tap "Add item" to begin.</td></tr>`;
@@ -404,14 +487,14 @@ function render() {
         <td>${escapeHtml(it.category || '-')}</td>
         <td>${it.qty}</td>
         <td>${escapeHtml(it.shelf || '-')}</td>
-        <td class="cost">₦${Number(it.cost).toFixed(2)}</td>
-        <td class="money">₦${Number(it.price).toFixed(2)}</td>
+        <td class="cost">${ngn(it.cost)}</td>
+        <td class="money">${ngn(it.price)}</td>
         <td>${badge}</td>
       </tr>`;
     }).join('');
   }
 
-  /* Log */
+  /* ---- Sales log ---- */
   const logBody = document.getElementById('logBody');
   if (log.length === 0) {
     logBody.innerHTML = `<tr><td colspan="6" class="empty">No movements recorded.</td></tr>`;
@@ -421,52 +504,177 @@ function render() {
       <td>${escapeHtml(l.name)}</td>
       <td>${l.qty}</td>
       <td>${escapeHtml(l.attendant)}</td>
-      <td class="money">₦${Number(l.price).toFixed(2)}</td>
-      <td class="money">₦${l.total}</td>
+      <td class="money">${ngn(l.price)}</td>
+      <td class="money">${ngn(l.total)}</td>
     </tr>`).join('');
   }
 
-  /* Stats */
+  /* ---- Staff ---- */
+  const staffBody = document.getElementById('staffBody');
+  if (staff.length === 0) {
+    staffBody.innerHTML = `<tr><td colspan="5" class="empty">No staff added yet.</td></tr>`;
+  } else {
+    staffBody.innerHTML = staff.map(s => `<tr>
+      <td>${escapeHtml(s.name)}</td>
+      <td>${escapeHtml(s.role || '-')}</td>
+      <td class="money">${ngn(s.salary)}</td>
+      <td>${s.paid ? '<span class="badge paid">Paid</span>' : '<span class="badge unpaid">Unpaid</span>'}</td>
+      <td>
+        <button class="small ${s.paid ? 'secondary' : 'success'}" onclick="togglePaid(${s.id})">
+          ${s.paid ? 'Mark unpaid' : 'Mark paid'}
+        </button>
+        <button class="small danger" onclick="deleteStaff(${s.id})">✕</button>
+      </td>
+    </tr>`).join('');
+  }
+
+  /* ---- Dashboard stats ---- */
   document.getElementById('statTotal').textContent = items.length;
   document.getElementById('statLow').textContent   = items.filter(i => i.qty <= i.min).length;
   document.getElementById('statExp').textContent   = items.filter(i => {
     if (!i.expiry) return false;
-    const days = (new Date(i.expiry) - new Date()) / 86400000;
-    return days <= 30;
+    return (new Date(i.expiry) - new Date()) / 86400000 <= 30;
   }).length;
+
+  /* ---- Accounting ---- */
+  const totalSales  = log.reduce((s, l) => s + Number(l.total || 0), 0);
+  const totalCogs   = log.reduce((s, l) => s + Number(l.cogs  || 0), 0);
+  const grossProfit = totalSales - totalCogs;
+
+  const stockCost   = items.reduce((s, i) => s + (i.cost  * i.qty), 0);
+  const stockRetail = items.reduce((s, i) => s + (i.price * i.qty), 0);
+
+  const salaryTotal = staff.reduce((s, x) => s + Number(x.salary || 0), 0);
+  const salaryPaid  = staff.filter(x => x.paid).reduce((s, x) => s + Number(x.salary || 0), 0);
+  const salaryUnpaid= salaryTotal - salaryPaid;
+
+  const netProfit = grossProfit - salaryTotal;
+
+  document.getElementById('accSales').textContent       = ngn(totalSales);
+  document.getElementById('accCogs').textContent        = ngn(totalCogs);
+  document.getElementById('accProfit').textContent      = ngn(grossProfit);
+  document.getElementById('accStockCost').textContent   = ngn(stockCost);
+  document.getElementById('accStockRetail').textContent = ngn(stockRetail);
+  document.getElementById('accNetProfit').textContent   = ngn(netProfit);
+
+  document.getElementById('accSalaryTotal').textContent  = ngn(salaryTotal);
+  document.getElementById('accSalaryPaid').textContent   = ngn(salaryPaid);
+  document.getElementById('accSalaryUnpaid').textContent = ngn(salaryUnpaid);
+
+  const summaryRows = [
+    ['Total sales revenue',              ngn(totalSales)],
+    ['Cost of goods sold (COGS)',       '− ' + ngn(totalCogs)],
+    ['Gross profit',                    ngn(grossProfit)],
+    ['Total staff salaries',            '− ' + ngn(salaryTotal)],
+    ['Net profit',                      ngn(netProfit)],
+    ['—', '—'],
+    ['Stock value at cost',             ngn(stockCost)],
+    ['Stock value at retail',           ngn(stockRetail)],
+    ['Potential profit in stock',       ngn(stockRetail - stockCost)],
+    ['—', '—'],
+    ['Items sold (units)',              log.reduce((s,l)=>s+Number(l.qty||0),0)],
+    ['Transactions',                    log.length],
+    ['Staff on payroll',                staff.length],
+  ];
+  document.getElementById('accountingSummary').innerHTML = summaryRows.map(([k,v]) =>
+    `<tr><td style="color:var(--muted)">${k}</td><td style="text-align:right;font-weight:600;">${v}</td></tr>`
+  ).join('');
+
+  /* ---- Backup info ---- */
+  const backupRows = [
+    ['Inventory items',   items.length],
+    ['Sales records',     log.length],
+    ['Staff records',     staff.length],
+    ['Last backup',       meta.lastBackup ? new Date(meta.lastBackup).toLocaleString() : 'Never'],
+    ['Storage used',      Math.round((JSON.stringify({items,log,staff}).length/1024)*10)/10 + ' KB'],
+  ];
+  document.getElementById('backupInfo').innerHTML = backupRows.map(([k,v]) =>
+    `<tr><td style="color:var(--muted)">${k}</td><td style="text-align:right;font-weight:600;">${v}</td></tr>`
+  ).join('');
 }
 
-/* ---------- Export ---------- */
+/* ================= CSV ================= */
 function exportCSV() {
   if (items.length === 0) { alert('No items to export.'); return; }
   const header = ['Name','Category','Shelf','Quantity','Min level','Cost price','Selling price','Expiry'];
-  const rows = items.map(i => [
-    i.name, i.category, i.shelf, i.qty, i.min, i.cost, i.price, i.expiry
-  ]);
-  const csv = [header, ...rows]
-    .map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(','))
-    .join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
+  const rows = items.map(i => [i.name, i.category, i.shelf, i.qty, i.min, i.cost, i.price, i.expiry]);
+  downloadCSV([header, ...rows], 'stocksentry_inventory.csv');
+}
+
+function exportSalesCSV() {
+  if (log.length === 0) { alert('No sales to export.'); return; }
+  const header = ['Date','Item','Qty sold','Attendant','Unit price','Total','COGS'];
+  const rows = log.map(l => [l.date, l.name, l.qty, l.attendant, l.price, l.total, l.cogs]);
+  downloadCSV([header, ...rows], 'stocksentry_sales.csv');
+}
+
+function downloadCSV(rows, filename) {
+  const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type:'text/csv' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'stocksentry_inventory.csv';
+  a.download = filename;
   a.click();
+}
+
+/* ================= BACKUP / RESTORE ================= */
+function downloadBackup() {
+  const payload = {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    items, log, staff
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+  a.href = URL.createObjectURL(blob);
+  a.download = `stocksentry_backup_${stamp}.json`;
+  a.click();
+
+  meta.lastBackup = new Date().toISOString();
+  persist(); render();
+}
+
+function restoreBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data.items) || !Array.isArray(data.log)) {
+        alert('Invalid backup file.');
+        return;
+      }
+      if (!confirm('This will overwrite all current data. Continue?')) return;
+      items = data.items;
+      log   = data.log;
+      staff = Array.isArray(data.staff) ? data.staff : [];
+      persist(); render();
+      alert('Backup restored successfully ✅');
+    } catch (err) {
+      alert('Could not read file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function wipeAll() {
+  if (!confirm('⚠ This deletes ALL inventory, sales, and staff. Are you sure?')) return;
+  if (!confirm('Last chance — really wipe everything?')) return;
+  items = []; log = []; staff = [];
+  persist(); render();
+  alert('All data wiped.');
 }
 
 function clearLog() {
   if (!confirm('Clear all sales/movement records?')) return;
   log = [];
-  persist();
-  render();
+  persist(); render();
 }
 
-function escapeHtml(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
-}
-
-/* ---------- Init ---------- */
+/* ================= INIT ================= */
 render();
 </script>
 </body>
