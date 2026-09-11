@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1f3a">
+  <meta name="description" content="StockSentry - simple offline inventory management">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+  <title>StockSentry</title>
+</head>
+<body>
+<header class="topbar">
+  <div><h1>StockSentry</h1><p>Simple inventory control</p></div>
+  <div class="status"><span id="onlineDot"></span><span id="onlineText">Online</span></div>
+</header>
+
+<main>
+  <section id="alerts" class="alerts hidden"></section>
+
+  <section class="dashboard">
+    <div class="stat"><span>Total items</span><strong id="totalItems">0</strong></div>
+    <div class="stat"><span>Low stock</span><strong id="lowItems">0</strong></div>
+    <div class="stat"><span>Expiring</span><strong id="expiringItems">0</strong></div>
+  </section>
+
+  <section class="toolbar">
+    <input id="search" type="search" placeholder="Search stock..." aria-label="Search stock">
+    <button id="addBtn" class="primary">＋ Add item</button>
+    <button id="exportBtn">Export CSV</button>
+  </section>
+
+  <section id="items" class="items"></section>
+
+  <section class="log-section">
+    <div class="section-title"><h2>Stock movement log</h2><button id="clearLogBtn" class="danger-text">Clear</button></div>
+    <div id="log" class="log"></div>
+  </section>
+</main>
+
+<dialog id="itemDialog">
+  <form method="dialog" id="itemForm">
+    <h2 id="dialogTitle">Add stock item</h2>
+    <label>Item name<input id="name" required maxlength="80"></label>
+    <label>Category<input id="category" maxlength="50" placeholder="e.g. Finished goods"></label>
+    <div class="two">
+      <label>Quantity<input id="qty" type="number" min="0" value="0" required></label>
+      <label>Minimum level<input id="min" type="number" min="0" value="5" required></label>
+    </div>
+    <label>Expiry date (optional)<input id="expiry" type="date"></label>
+    <div class="dialog-actions">
+      <button value="cancel">Cancel</button>
+      <button id="saveBtn" class="primary" value="default">Save item</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
