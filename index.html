@@ -1,60 +1,473 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0b1f3a">
-  <meta name="description" content="StockSentry - simple offline inventory management">
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css">
-  <title>StockSentry</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StockSentry</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card2: #273449;
+    --accent: #38bdf8;
+    --accent2: #22c55e;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #334155;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 16px;
+  }
+  h1 { margin: 0 0 4px; font-size: 1.6rem; }
+  .sub { color: var(--muted); font-size: .85rem; margin-bottom: 16px; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat .num { font-size: 1.6rem; font-weight: 700; }
+  .stat .label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .stat.low .num { color: var(--warn); }
+  .stat.exp .num { color: var(--danger); }
+
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  button {
+    background: var(--accent);
+    color: #0b1220;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: .9rem;
+  }
+  button:hover { filter: brightness(1.1); }
+  button.secondary {
+    background: var(--card2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  button.danger { background: var(--danger); color: white; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .card h2 {
+    margin: 0 0 12px;
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .85rem;
+  }
+  th, td {
+    padding: 8px 6px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--muted); font-weight: 600; font-size: .75rem; text-transform: uppercase; }
+  tr:hover td { background: rgba(56,189,248,.05); }
+
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 24px 0;
+    font-style: italic;
+  }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 100;
+  }
+  .modal-bg.active { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h3 { margin: 0 0 16px; }
+
+  label {
+    display: block;
+    font-size: .8rem;
+    color: var(--muted);
+    margin: 10px 0 4px;
+  }
+  input, select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 10px;
+    border-radius: 6px;
+    font-size: .9rem;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    justify-content: flex-end;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: .7rem;
+    font-weight: 600;
+  }
+  .badge.ok { background: rgba(34,197,94,.2); color: #4ade80; }
+  .badge.low { background: rgba(245,158,11,.2); color: #fbbf24; }
+  .badge.out { background: rgba(239,68,68,.2); color: #f87171; }
+
+  .money { color: #4ade80; }
+  .cost { color: #fbbf24; }
+</style>
 </head>
 <body>
-<header class="topbar">
-  <div><h1>StockSentry</h1><p>Simple inventory control</p></div>
-  <div class="status"><span id="onlineDot"></span><span id="onlineText">Online</span></div>
-</header>
 
-<main>
-  <section id="alerts" class="alerts hidden"></section>
+  <h1>StockSentry</h1>
+  <div class="sub">Simple inventory control · Online</div>
 
-  <section class="dashboard">
-    <div class="stat"><span>Total items</span><strong id="totalItems">0</strong></div>
-    <div class="stat"><span>Low stock</span><strong id="lowItems">0</strong></div>
-    <div class="stat"><span>Expiring</span><strong id="expiringItems">0</strong></div>
-  </section>
+  <div class="stats">
+    <div class="stat"><div class="num" id="statTotal">0</div><div class="label">Total items</div></div>
+    <div class="stat low"><div class="num" id="statLow">0</div><div class="label">Low stock</div></div>
+    <div class="stat exp"><div class="num" id="statExp">0</div><div class="label">Expiring</div></div>
+  </div>
 
-  <section class="toolbar">
-    <input id="search" type="search" placeholder="Search stock..." aria-label="Search stock">
-    <button id="addBtn" class="primary">＋ Add item</button>
-    <button id="exportBtn">Export CSV</button>
-  </section>
+  <div class="toolbar">
+    <button onclick="openItemModal()">＋ Add item</button>
+    <button class="secondary" onclick="openSaleModal()">🛒 Record sale</button>
+    <button class="secondary" onclick="exportCSV()">Export CSV</button>
+  </div>
 
-  <section id="items" class="items"></section>
-
-  <section class="log-section">
-    <div class="section-title"><h2>Stock movement log</h2><button id="clearLogBtn" class="danger-text">Clear</button></div>
-    <div id="log" class="log"></div>
-  </section>
-</main>
-
-<dialog id="itemDialog">
-  <form method="dialog" id="itemForm">
-    <h2 id="dialogTitle">Add stock item</h2>
-    <label>Item name<input id="name" required maxlength="80"></label>
-    <label>Category<input id="category" maxlength="50" placeholder="e.g. Finished goods"></label>
-    <div class="two">
-      <label>Quantity<input id="qty" type="number" min="0" value="0" required></label>
-      <label>Minimum level<input id="min" type="number" min="0" value="5" required></label>
+  <!-- Inventory -->
+  <div class="card">
+    <h2>Inventory</h2>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Category</th>
+            <th>Qty</th>
+            <th>Shelf</th>
+            <th>Cost</th>
+            <th>Price</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryBody">
+          <tr><td colspan="7" class="empty">No stock items yet. Tap "Add item" to begin.</td></tr>
+        </tbody>
+      </table>
     </div>
-    <label>Expiry date (optional)<input id="expiry" type="date"></label>
-    <div class="dialog-actions">
-      <button value="cancel">Cancel</button>
-      <button id="saveBtn" class="primary" value="default">Save item</button>
-    </div>
-  </form>
-</dialog>
+  </div>
 
-<script src="app.js"></script>
+  <!-- Sales log -->
+  <div class="card">
+    <h2>Sales / Movement log <button class="danger" style="font-size:.75rem;padding:6px 10px;" onclick="clearLog()">Clear</button></h2>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Item</th>
+            <th>Qty sold</th>
+            <th>Attendant</th>
+            <th>Unit price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="logBody">
+          <tr><td colspan="6" class="empty">No movements recorded.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add Item Modal -->
+  <div class="modal-bg" id="itemModal">
+    <div class="modal">
+      <h3>Add stock item</h3>
+
+      <label>Item name</label>
+      <input id="itemName" placeholder="e.g. Rice 5kg" />
+
+      <div class="row">
+        <div>
+          <label>Category</label>
+          <input id="itemCategory" placeholder="e.g. Food" />
+        </div>
+        <div>
+          <label>Shelf number</label>
+          <input id="itemShelf" placeholder="e.g. A3" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Quantity</label>
+          <input id="itemQty" type="number" min="0" value="0" />
+        </div>
+        <div>
+          <label>Minimum level</label>
+          <input id="itemMin" type="number" min="0" value="5" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Cost price (₦)</label>
+          <input id="itemCost" type="number" min="0" step="0.01" value="0" />
+        </div>
+        <div>
+          <label>Selling price (₦)</label>
+          <input id="itemPrice" type="number" min="0" step="0.01" value="0" />
+        </div>
+      </div>
+
+      <label>Expiry date (optional)</label>
+      <input id="itemExpiry" type="date" />
+
+      <div class="modal-actions">
+        <button class="secondary" onclick="closeModal('itemModal')">Cancel</button>
+        <button onclick="saveItem()">Save item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sale Modal -->
+  <div class="modal-bg" id="saleModal">
+    <div class="modal">
+      <h3>Record sale</h3>
+
+      <label>Item</label>
+      <select id="saleItem"></select>
+
+      <div class="row">
+        <div>
+          <label>Quantity sold</label>
+          <input id="saleQty" type="number" min="1" value="1" />
+        </div>
+        <div>
+          <label>Name of attendant</label>
+          <input id="saleAttendant" placeholder="e.g. Chidi" />
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="secondary" onclick="closeModal('saleModal')">Cancel</button>
+        <button onclick="saveSale()">Record sale</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ---------- State ---------- */
+let items = JSON.parse(localStorage.getItem('ss_items') || '[]');
+let log   = JSON.parse(localStorage.getItem('ss_log')   || '[]');
+
+function persist() {
+  localStorage.setItem('ss_items', JSON.stringify(items));
+  localStorage.setItem('ss_log',   JSON.stringify(log));
+}
+
+/* ---------- Modals ---------- */
+function openItemModal() {
+  ['itemName','itemCategory','itemShelf','itemCost','itemPrice','itemExpiry'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('itemQty').value = 0;
+  document.getElementById('itemMin').value = 5;
+  document.getElementById('itemModal').classList.add('active');
+}
+function openSaleModal() {
+  if (items.length === 0) { alert('Add an item first.'); return; }
+  const sel = document.getElementById('saleItem');
+  sel.innerHTML = items.map((it, i) =>
+    `<option value="${i}">${it.name} (${it.qty} in stock) — ₦${it.price}</option>`
+  ).join('');
+  document.getElementById('saleQty').value = 1;
+  document.getElementById('saleAttendant').value = '';
+  document.getElementById('saleModal').classList.add('active');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+/* ---------- Save Item ---------- */
+function saveItem() {
+  const name = document.getElementById('itemName').value.trim();
+  if (!name) { alert('Item name required'); return; }
+
+  const item = {
+    id: Date.now(),
+    name,
+    category: document.getElementById('itemCategory').value.trim(),
+    shelf:    document.getElementById('itemShelf').value.trim(),
+    qty:      Number(document.getElementById('itemQty').value)   || 0,
+    min:      Number(document.getElementById('itemMin').value)   || 0,
+    cost:     Number(document.getElementById('itemCost').value)  || 0,
+    price:    Number(document.getElementById('itemPrice').value) || 0,
+    expiry:   document.getElementById('itemExpiry').value || ''
+  };
+  items.push(item);
+  persist();
+  closeModal('itemModal');
+  render();
+}
+
+/* ---------- Save Sale ---------- */
+function saveSale() {
+  const idx = Number(document.getElementById('saleItem').value);
+  const qty = Number(document.getElementById('saleQty').value);
+  const attendant = document.getElementById('saleAttendant').value.trim();
+
+  if (qty < 1) { alert('Quantity must be at least 1'); return; }
+  if (!attendant) { alert('Attendant name required'); return; }
+
+  const item = items[idx];
+  if (qty > item.qty) { alert('Not enough stock. Available: ' + item.qty); return; }
+
+  item.qty -= qty;
+  log.unshift({
+    date: new Date().toLocaleString(),
+    name: item.name,
+    qty,
+    attendant,
+    price: item.price,
+    total: (item.price * qty).toFixed(2)
+  });
+
+  persist();
+  closeModal('saleModal');
+  render();
+}
+
+/* ---------- Render ---------- */
+function render() {
+  /* Inventory */
+  const tbody = document.getElementById('inventoryBody');
+  if (items.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty">No stock items yet. Tap "Add item" to begin.</td></tr>`;
+  } else {
+    tbody.innerHTML = items.map(it => {
+      let badge = '<span class="badge ok">OK</span>';
+      if (it.qty === 0) badge = '<span class="badge out">Out</span>';
+      else if (it.qty <= it.min) badge = '<span class="badge low">Low</span>';
+      return `<tr>
+        <td>${escapeHtml(it.name)}</td>
+        <td>${escapeHtml(it.category || '-')}</td>
+        <td>${it.qty}</td>
+        <td>${escapeHtml(it.shelf || '-')}</td>
+        <td class="cost">₦${Number(it.cost).toFixed(2)}</td>
+        <td class="money">₦${Number(it.price).toFixed(2)}</td>
+        <td>${badge}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  /* Log */
+  const logBody = document.getElementById('logBody');
+  if (log.length === 0) {
+    logBody.innerHTML = `<tr><td colspan="6" class="empty">No movements recorded.</td></tr>`;
+  } else {
+    logBody.innerHTML = log.map(l => `<tr>
+      <td>${l.date}</td>
+      <td>${escapeHtml(l.name)}</td>
+      <td>${l.qty}</td>
+      <td>${escapeHtml(l.attendant)}</td>
+      <td class="money">₦${Number(l.price).toFixed(2)}</td>
+      <td class="money">₦${l.total}</td>
+    </tr>`).join('');
+  }
+
+  /* Stats */
+  document.getElementById('statTotal').textContent = items.length;
+  document.getElementById('statLow').textContent   = items.filter(i => i.qty <= i.min).length;
+  document.getElementById('statExp').textContent   = items.filter(i => {
+    if (!i.expiry) return false;
+    const days = (new Date(i.expiry) - new Date()) / 86400000;
+    return days <= 30;
+  }).length;
+}
+
+/* ---------- Export ---------- */
+function exportCSV() {
+  if (items.length === 0) { alert('No items to export.'); return; }
+  const header = ['Name','Category','Shelf','Quantity','Min level','Cost price','Selling price','Expiry'];
+  const rows = items.map(i => [
+    i.name, i.category, i.shelf, i.qty, i.min, i.cost, i.price, i.expiry
+  ]);
+  const csv = [header, ...rows]
+    .map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(','))
+    .join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'stocksentry_inventory.csv';
+  a.click();
+}
+
+function clearLog() {
+  if (!confirm('Clear all sales/movement records?')) return;
+  log = [];
+  persist();
+  render();
+}
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+/* ---------- Init ---------- */
+render();
+</script>
 </body>
 </html>
